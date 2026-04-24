@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Insertional Mutagenesis Simulation</title>
+<style>
+  :root {
+    --bg: #0f1220;
+    --panel: #171a2e;
+    --ink: #e6e9f5;
+    --muted: #8b93b5;
+    --accent: #4cc9f0;
+    --gene: #3a86ff;        /* protein-coding, intact */
+    --gene-ko: #e63946;     /* knocked out (red) */
+    --nc: #ff9f1c;          /* non-coding, intact */
+    --nc-ko: #e63946;       /* knocked out (red) */
+    --insert: #ef476f;
+    --grid: #262a46;
+    --good: #06d6a0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  header {
+    padding: 24px 32px 8px;
+  }
+  h1 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: 0.2px; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px 32px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid #232746;
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  button {
+    background: var(--accent);
+    color: #06121a;
+    border: 0;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  button.secondary {
+    background: #2a2f55;
+    color: var(--ink);
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  input[type="range"] { accent-color: var(--accent); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+  @media (max-width: 1100px) {
+    .stats { grid-template-columns: repeat(3, 1fr); }
+  }
+  .stat {
+    background: #1c2040;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat .v { font-size: 20px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  .viz-wrap { overflow-x: auto; }
+  svg { display: block; }
+  .legend { display: flex; gap: 18px; margin-top: 10px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+  .legend .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 900px) {
+    .charts { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Insertional Mutagenesis Simulation</h1>
+  <div class="sub">Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution. Any insertion landing inside a gene knocks it out. &nbsp;<a href="explainer.html" style="color: var(--accent);">Why the expected curve looks like that →</a></div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="controls">
+      <label style="flex-direction: column; align-items: flex-start; gap: 4px;">
+        <span style="font-size:11px; text-transform: uppercase; letter-spacing: 0.08em;">Gene distribution</span>
+        <select id="preset" style="background:#1c2040; border:1px solid #2a2f55; border-radius:4px; padding:6px 8px; font-size: 13px; font-weight: 600;">
+          <option value="yeast"       style="color:#e0a84a; background:#1c2040;">S. cerevisiae — baker's yeast (dense)</option>
+          <option value="arabidopsis" style="color:#5cbf3e; background:#1c2040;">A. thaliana — thale cress (moderate)</option>
+          <option value="ecoli"       style="color:#e85a85; background:#1c2040;">E. coli — bacterium (very dense)</option>
+          <option value="human"       style="color:#b088f9; background:#1c2040;">H. sapiens — gene bodies (sparse)</option>
+          <option value="synthetic"   style="color:#9aa1b8; background:#1c2040;">Synthetic (arbitrary)</option>
+        </select>
+      </label>
+      <button id="startBtn">Start</button>
+      <button id="pauseBtn" class="secondary" disabled>Pause</button>
+      <button id="stepBtn" class="secondary">Step +1</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+      <label>Speed
+        <input id="speed" type="range" min="1" max="500" value="10" />
+        <span id="speedVal" style="color:var(--ink); min-width: 5ch; text-align: right;">10/s</span>
+      </label>
+      <label>Stop at
+        <input id="stopAt" type="number" min="0" value="0" style="width: 90px; background:#1c2040; color:var(--ink); border:1px solid #2a2f55; border-radius:4px; padding:4px 6px;" />
+        <span style="font-size:11px;">0 = no limit</span>
+      </label>
+    </div>
+
+    <div id="presetInfo" style="margin-top: 10px; font-size: 13px; color: var(--muted); line-height: 1.5;"></div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Insertions</div><div class="v" id="statInsertions">0</div></div>
+      <div class="stat"><div class="k">Total KO</div><div class="v" id="statKO">0 / 30</div></div>
+      <div class="stat"><div class="k" style="color: var(--gene)">Protein-coding KO</div><div class="v" id="statKOpc">0 / 0</div></div>
+      <div class="stat"><div class="k" style="color: var(--nc)">Non-coding KO</div><div class="v" id="statKOnc">0 / 0</div></div>
+      <div class="stat"><div class="k">Overall KO %</div><div class="v" id="statProp">0.0%</div></div>
+      <div class="stat"><div class="k">Genic fraction of window</div><div class="v" id="statCoding">–</div></div>
+    </div>
+  </section>
+
+  <section class="panel viz-wrap">
+    <svg id="dna" width="1340" height="130" role="img" aria-label="DNA segment with genes"></svg>
+    <div class="legend">
+      <span><span class="swatch" style="background: var(--gene)"></span>Protein-coding — intact</span>
+      <span><span class="swatch" style="background: var(--nc)"></span>Non-coding — intact</span>
+      <span><span class="swatch" style="background: var(--gene-ko)"></span>Knocked out</span>
+      <span><span class="swatch" style="background: var(--insert)"></span>Insertion site</span>
+      <span><span class="swatch" style="background:#2a2f55"></span>Intergenic DNA</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div style="font-size: 13px; color: var(--muted); margin-bottom: 6px;">Knockout proportion within each class vs. insertion count — each line is the fraction of that class that has been hit at least once.</div>
+    <svg id="chart" width="1340" height="240"></svg>
+  </section>
+</main>
+
+<script>
+(() => {
+  // ---------- Species presets ----------
+  // Reference parameters for each genome. Gene sizes are drawn from log-normal
+  // distributions fitted to typical gene-length data. "Size" = gene body
+  // (exons + introns) — the target for insertional disruption.
+  //
+  // ncFraction   = proportion of annotated genes that are non-coding RNAs
+  // pcMedian/Sigma = protein-coding size distribution (log-normal)
+  // ncMedian/Sigma = non-coding size distribution (log-normal)
+  // genicFraction = fraction of genome occupied by any gene body (PC + NC)
+  const PRESETS = {
+    yeast: {
+      label: "S. cerevisiae (baker's yeast)",
+      pcMedian: 1400,  pcSigma: 0.55,
+      ncMedian: 150,   ncSigma: 0.75,     // tRNAs ~75 bp, snoRNAs ~100–200, a few longer ncRNAs
+      ncFraction: 0.15,                    // ~800 of ~6000 genes are ncRNAs
+      genicFraction: 0.72,
+      note: "~12 Mb · ~6,000 genes (~15% ncRNA: mostly tRNAs & snoRNAs). Very gene-dense, introns rare."
+    },
+    arabidopsis: {
+      label: "A. thaliana (thale cress)",
+      pcMedian: 2100,  pcSigma: 0.7,
+      ncMedian: 400,   ncSigma: 1.0,       // mix of miRNA precursors (~100 bp) & lncRNAs (kb-scale)
+      ncFraction: 0.18,                    // ~5,000 ncRNAs among ~32,000 annotated genes
+      genicFraction: 0.40,
+      note: "~135 Mb · ~27,000 PC genes + ~5,000 ncRNAs (miRNAs, lncRNAs, tRNAs). Kilobase intergenic gaps."
+    },
+    ecoli: {
+      label: "E. coli (bacterium)",
+      pcMedian: 900,   pcSigma: 0.35,
+      ncMedian: 100,   ncSigma: 0.55,      // tRNAs ~76 bp, rRNAs 1.5–2.9 kb, small sRNAs
+      ncFraction: 0.03,                    // ~100 ncRNAs of ~4,300
+      genicFraction: 0.88,
+      note: "~4.6 Mb · ~4,300 genes (~3% ncRNA: tRNAs, rRNAs, sRNAs). Operons packed back-to-back."
+    },
+    human: {
+      label: "H. sapiens (gene bodies incl. introns)",
+      pcMedian: 14000, pcSigma: 1.15,      // very wide; some PC genes ≥100 kb
+      ncMedian: 1200,  ncSigma: 1.35,      // lncRNAs kb-scale, miRNA precursors ~80 bp, snoRNAs
+      ncFraction: 0.50,                    // roughly 20k PC + 20k+ lncRNA/miRNA/other
+      genicFraction: 0.45,
+      note: "~3.2 Gb · ~20,000 PC + ~20,000+ ncRNAs (lncRNAs, miRNAs). Gene bodies huge, separated by 10s–100s of kb."
+    },
+    synthetic: {
+      label: "Synthetic (original toy)",
+      pcMedian: 1400,  pcSigma: 0.8,
+      ncMedian: 300,   ncSigma: 0.9,
+      ncFraction: 0.20,
+      genicFraction: 0.55,
+      note: "Arbitrary demo parameters — not based on any real organism."
+    }
+  };
+
+  // Thematic accent colour for each species — used in the dropdown, selected value,
+  // and info line. Chosen to evoke each organism (amber yeast, leaf green,
+  // Gram-stain pink, lilac human, neutral grey for the synthetic toy).
+  const SPECIES_COLORS = {
+    yeast:       '#e0a84a',
+    arabidopsis: '#5cbf3e',
+    ecoli:       '#e85a85',
+    human:       '#b088f9',
+    synthetic:   '#9aa1b8'
+  };
+
+  const GENE_COUNT = 30;
+  let DNA_LENGTH = 100000;     // recomputed from preset
+  let currentPreset = 'yeast';
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randInt = (a, b) => Math.floor(rand(a, b + 1));
+
+  // Standard normal via Box–Muller
+  function randn() {
+    const u = Math.max(Math.random(), 1e-12), v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  // Draw from log-normal with given median and sigma in log-space.
+  function logNormal(median, sigma) {
+    return median * Math.exp(sigma * randn());
+  }
+
+  // ---------- Build genes ----------
+  function buildGenes() {
+    const preset = PRESETS[currentPreset];
+
+    // Decide how many of the 30 genes are non-coding. Round from preset.ncFraction,
+    // clamped so we always have at least some PC (this keeps all six stat tiles meaningful).
+    const ncCount = Math.min(GENE_COUNT - 1, Math.max(0, Math.round(GENE_COUNT * preset.ncFraction)));
+    const pcCount = GENE_COUNT - ncCount;
+
+    // Build a shuffled array of kinds so PC/NC slots are interleaved along the DNA.
+    const kinds = Array.from({length: GENE_COUNT},
+      (_, i) => i < ncCount ? 'nc' : 'pc');
+    for (let i = kinds.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [kinds[i], kinds[j]] = [kinds[j], kinds[i]];
+    }
+
+    // Draw a size for each gene from the distribution appropriate to its class.
+    const drawSize = (kind) => {
+      const med = kind === 'pc' ? preset.pcMedian : preset.ncMedian;
+      const sig = kind === 'pc' ? preset.pcSigma : preset.ncSigma;
+      const lo = Math.max(40, Math.round(med * 0.1));
+      const hi = Math.round(med * 20);
+      return Math.round(Math.min(hi, Math.max(lo, logNormal(med, sig))));
+    };
+    const sizes = kinds.map(drawSize);
+
+    // Set the DNA window length so total genic DNA matches the preset's genicFraction.
+    const totalGenic = sizes.reduce((a, b) => a + b, 0);
+    DNA_LENGTH = Math.round(totalGenic / preset.genicFraction);
+    const totalGap = DNA_LENGTH - totalGenic;
+
+    // Distribute intergenic DNA across 31 gaps with realistic variability.
+    const gapRaw = Array.from({length: GENE_COUNT + 1}, () => logNormal(1, 0.8));
+    const gapSum = gapRaw.reduce((a, b) => a + b, 0);
+    const gaps = gapRaw.map(g => Math.max(20, Math.round(g * totalGap / gapSum)));
+
+    const genes = [];
+    let cursor = 0;
+    for (let i = 0; i < GENE_COUNT; i++) {
+      cursor += gaps[i];
+      const start = cursor;
+      const end = Math.min(DNA_LENGTH - 1, start + sizes[i] - 1);
+      genes.push({
+        id: i + 1,
+        kind: kinds[i],
+        start, end,
+        size: end - start + 1,
+        knocked: false
+      });
+      cursor = end + 1;
+    }
+    return genes;
+  }
+
+  // ---------- Length formatting ----------
+  function fmtLen(bp) {
+    if (bp >= 1e6) return (bp / 1e6).toFixed(bp >= 1e7 ? 0 : 1) + ' Mb';
+    if (bp >= 1e3) return (bp / 1e3).toFixed(bp >= 1e5 ? 0 : 1) + ' kb';
+    return bp + ' bp';
+  }
+
+  // ---------- State ----------
+  let genes = [];
+  let insertions = []; // positions
+  let koCount = 0;
+  let koPC = 0;        // protein-coding knockouts
+  let koNC = 0;        // non-coding knockouts
+  let pcTotal = 0;
+  let ncTotal = 0;
+  let running = false;
+  let timer = null;
+
+  // ---------- DOM ----------
+  const svg = document.getElementById('dna');
+  const chart = document.getElementById('chart');
+  const statIns = document.getElementById('statInsertions');
+  const statKO = document.getElementById('statKO');
+  const statKOpc = document.getElementById('statKOpc');
+  const statKOnc = document.getElementById('statKOnc');
+  const statProp = document.getElementById('statProp');
+  const statCoding = document.getElementById('statCoding');
+  const speedEl = document.getElementById('speed');
+  const speedVal = document.getElementById('speedVal');
+  const stopAtEl = document.getElementById('stopAt');
+  const startBtn = document.getElementById('startBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const stepBtn = document.getElementById('stepBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const presetEl = document.getElementById('preset');
+  const presetInfo = document.getElementById('presetInfo');
+
+  // ---------- DNA rendering ----------
+  const SVG_W = 1340, SVG_H = 130;
+  const PAD_X = 20;
+  const TRACK_Y = 60;
+  const TRACK_H = 28;
+  const USABLE_W = SVG_W - 2 * PAD_X;
+  const bpToX = bp => PAD_X + (bp / DNA_LENGTH) * USABLE_W;
+
+  // Fixed 10 kb scale bar used across all genomes — makes it easy to compare
+  // gene-density between species at a glance.
+  const SCALE_BP = 10000;
+
+  function drawScaleBar() {
+    const color = SPECIES_COLORS[currentPreset];
+    const y = 22;
+    const xStart = PAD_X + 8;
+    const xEnd = xStart + (SCALE_BP / DNA_LENGTH) * USABLE_W;
+    const tickHalf = 5;
+
+    // Main bar
+    const bar = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    bar.setAttribute('x1', xStart); bar.setAttribute('x2', xEnd);
+    bar.setAttribute('y1', y); bar.setAttribute('y2', y);
+    bar.setAttribute('stroke', color); bar.setAttribute('stroke-width', '1.6');
+    svg.appendChild(bar);
+
+    // End ticks
+    for (const tx of [xStart, xEnd]) {
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      t.setAttribute('x1', tx); t.setAttribute('x2', tx);
+      t.setAttribute('y1', y - tickHalf); t.setAttribute('y2', y + tickHalf);
+      t.setAttribute('stroke', color); t.setAttribute('stroke-width', '1.6');
+      svg.appendChild(t);
+    }
+
+    // Label — placed to the right of the bar so it stays readable even when
+    // the bar is only a few pixels wide (e.g. the human preset).
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', xEnd + 8);
+    label.setAttribute('y', y + 4);
+    label.setAttribute('fill', color);
+    label.setAttribute('font-size', '11');
+    label.setAttribute('font-weight', '600');
+    label.textContent = fmtLen(SCALE_BP);
+    svg.appendChild(label);
+  }
+
+  function renderDNABase() {
+    svg.innerHTML = '';
+
+    // 100 kb reference scale bar (adaptive: steps down for shorter windows).
+    drawScaleBar();
+
+    // Backbone (intergenic)
+    const back = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    back.setAttribute('x', PAD_X);
+    back.setAttribute('y', TRACK_Y);
+    back.setAttribute('width', USABLE_W);
+    back.setAttribute('height', TRACK_H);
+    back.setAttribute('fill', '#2a2f55');
+    back.setAttribute('rx', 4);
+    svg.appendChild(back);
+
+    // Genes
+    for (const g of genes) {
+      const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      r.setAttribute('x', bpToX(g.start));
+      r.setAttribute('y', TRACK_Y);
+      r.setAttribute('width', Math.max(1, bpToX(g.end) - bpToX(g.start)));
+      r.setAttribute('height', TRACK_H);
+      r.setAttribute('fill', g.kind === 'pc' ? 'var(--gene)' : 'var(--nc)');
+      r.setAttribute('rx', 2);
+      r.dataset.geneId = g.id;
+      r.dataset.kind = g.kind;
+      const title = document.createElementNS('http://www.w3.org/2000/svg','title');
+      title.textContent = `Gene ${g.id} · ${g.kind === 'pc' ? 'protein-coding' : 'non-coding'} · ${fmtLen(g.size)}`;
+      r.appendChild(title);
+      svg.appendChild(r);
+
+      // Gene label (only if wide enough)
+      const w = bpToX(g.end) - bpToX(g.start);
+      if (w > 22) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        t.setAttribute('x', bpToX(g.start) + w / 2);
+        t.setAttribute('y', TRACK_Y + TRACK_H / 2 + 4);
+        t.setAttribute('fill', '#eef3ff');
+        t.setAttribute('font-size', '10');
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('pointer-events', 'none');
+        t.textContent = g.id;
+        svg.appendChild(t);
+      }
+    }
+
+    // Scale ticks
+    const ticks = 10;
+    for (let i = 0; i <= ticks; i++) {
+      const bp = Math.round((DNA_LENGTH * i) / ticks);
+      const x = bpToX(bp);
+      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tick.setAttribute('x1', x); tick.setAttribute('x2', x);
+      tick.setAttribute('y1', TRACK_Y + TRACK_H + 4);
+      tick.setAttribute('y2', TRACK_Y + TRACK_H + 10);
+      tick.setAttribute('stroke', '#3a3f66');
+      svg.appendChild(tick);
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lbl.setAttribute('x', x);
+      lbl.setAttribute('y', TRACK_Y + TRACK_H + 22);
+      lbl.setAttribute('fill', 'var(--muted)');
+      lbl.setAttribute('font-size', '10');
+      lbl.setAttribute('text-anchor', 'middle');
+      lbl.textContent = fmtLen(bp);
+      svg.appendChild(lbl);
+    }
+  }
+
+  function setGeneKO(id) {
+    const rect = svg.querySelector(`rect[data-gene-id="${id}"]`);
+    if (!rect) return;
+    const kind = rect.dataset.kind;
+    rect.setAttribute('fill', kind === 'pc' ? 'var(--gene-ko)' : 'var(--nc-ko)');
+  }
+
+  function drawInsertion(pos) {
+    const x = bpToX(pos);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x); line.setAttribute('x2', x);
+    line.setAttribute('y1', TRACK_Y - 10);
+    line.setAttribute('y2', TRACK_Y + TRACK_H + 2);
+    line.setAttribute('stroke', 'var(--insert)');
+    line.setAttribute('stroke-width', '1.2');
+    line.setAttribute('opacity', '0.85');
+    svg.appendChild(line);
+
+    const tri = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    tri.setAttribute('points', `${x-3},${TRACK_Y-12} ${x+3},${TRACK_Y-12} ${x},${TRACK_Y-6}`);
+    tri.setAttribute('fill', 'var(--insert)');
+    svg.appendChild(tri);
+  }
+
+  // ---------- Chart ----------
+  const CH_W = 1340, CH_H = 240;
+  const CH_PAD_L = 50, CH_PAD_R = 20, CH_PAD_T = 16, CH_PAD_B = 34;
+  const CH_PLOT_W = CH_W - CH_PAD_L - CH_PAD_R;
+  const CH_PLOT_H = CH_H - CH_PAD_T - CH_PAD_B;
+
+  let chartMaxX = 100; // grows as insertions grow
+
+  function renderChartBase() {
+    chart.innerHTML = '';
+    // Axes
+    const axis = (x1,y1,x2,y2) => {
+      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+      l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('stroke','#3a3f66'); l.setAttribute('stroke-width','1');
+      return l;
+    };
+    chart.appendChild(axis(CH_PAD_L, CH_PAD_T, CH_PAD_L, CH_PAD_T + CH_PLOT_H));
+    chart.appendChild(axis(CH_PAD_L, CH_PAD_T + CH_PLOT_H, CH_PAD_L + CH_PLOT_W, CH_PAD_T + CH_PLOT_H));
+
+    // Y gridlines + labels (0, 25, 50, 75, 100)
+    for (let p = 0; p <= 100; p += 25) {
+      const y = CH_PAD_T + CH_PLOT_H - (p/100) * CH_PLOT_H;
+      const g = document.createElementNS('http://www.w3.org/2000/svg','line');
+      g.setAttribute('x1', CH_PAD_L); g.setAttribute('x2', CH_PAD_L + CH_PLOT_W);
+      g.setAttribute('y1', y); g.setAttribute('y2', y);
+      g.setAttribute('stroke', '#23274a'); g.setAttribute('stroke-dasharray','3,3');
+      chart.appendChild(g);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', CH_PAD_L - 8); t.setAttribute('y', y + 4);
+      t.setAttribute('fill','var(--muted)'); t.setAttribute('font-size','11');
+      t.setAttribute('text-anchor','end');
+      t.textContent = p + '%';
+      chart.appendChild(t);
+    }
+
+    // Axis titles
+    const xt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    xt.setAttribute('x', CH_PAD_L + CH_PLOT_W / 2);
+    xt.setAttribute('y', CH_H - 8);
+    xt.setAttribute('fill','var(--muted)'); xt.setAttribute('font-size','11');
+    xt.setAttribute('text-anchor','middle');
+    xt.textContent = 'Insertions';
+    chart.appendChild(xt);
+
+    const yt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    yt.setAttribute('x', 14); yt.setAttribute('y', CH_PAD_T + CH_PLOT_H / 2);
+    yt.setAttribute('fill','var(--muted)'); yt.setAttribute('font-size','11');
+    yt.setAttribute('text-anchor','middle');
+    yt.setAttribute('transform', `rotate(-90 14 ${CH_PAD_T + CH_PLOT_H / 2})`);
+    yt.textContent = 'KO % within class';
+    chart.appendChild(yt);
+
+    // Four curves: observed + expected, each for PC and NC classes.
+    const makePath = (id, color, dashed) => {
+      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('id', id);
+      p.setAttribute('fill','none');
+      p.setAttribute('stroke', color);
+      p.setAttribute('stroke-width', dashed ? '1.2' : '1.8');
+      if (dashed) {
+        p.setAttribute('stroke-dasharray','4,4');
+        p.setAttribute('opacity','0.75');
+      }
+      chart.appendChild(p);
+    };
+    makePath('expectedPC', '#3a86ff', true);
+    makePath('expectedNC', '#ff9f1c', true);
+    makePath('actualPC',   '#3a86ff', false);
+    makePath('actualNC',   '#ff9f1c', false);
+
+    // Legend
+    const makeLegend = (x, color, label, dashed=false) => {
+      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1', x); l.setAttribute('x2', x + 22);
+      l.setAttribute('y1', CH_PAD_T + 8); l.setAttribute('y2', CH_PAD_T + 8);
+      l.setAttribute('stroke', color); l.setAttribute('stroke-width','2');
+      if (dashed) l.setAttribute('stroke-dasharray','4,4');
+      chart.appendChild(l);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', x + 28); t.setAttribute('y', CH_PAD_T + 12);
+      t.setAttribute('fill','var(--muted)'); t.setAttribute('font-size','11');
+      t.textContent = label;
+      chart.appendChild(t);
+    };
+    makeLegend(CH_PAD_L + 10,  '#3a86ff', 'PC observed');
+    makeLegend(CH_PAD_L + 130, '#3a86ff', 'PC expected', true);
+    makeLegend(CH_PAD_L + 260, '#ff9f1c', 'NC observed');
+    makeLegend(CH_PAD_L + 380, '#ff9f1c', 'NC expected', true);
+  }
+
+  function redrawChart() {
+    const actualPC = chart.querySelector('#actualPC');
+    const actualNC = chart.querySelector('#actualNC');
+    const expectedPC = chart.querySelector('#expectedPC');
+    const expectedNC = chart.querySelector('#expectedNC');
+    if (!actualPC || !actualNC || !expectedPC || !expectedNC) return;
+
+    chartMaxX = Math.max(100, insertions.length, chartMaxX);
+    // X ticks (5 gridlines). Clear previous labels first.
+    chart.querySelectorAll('.x-tick').forEach(n => n.remove());
+    for (let i = 0; i <= 5; i++) {
+      const xv = Math.round((chartMaxX * i) / 5);
+      const x = CH_PAD_L + (xv / chartMaxX) * CH_PLOT_W;
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', x); t.setAttribute('y', CH_PAD_T + CH_PLOT_H + 16);
+      t.setAttribute('fill','var(--muted)'); t.setAttribute('font-size','11');
+      t.setAttribute('text-anchor','middle');
+      t.setAttribute('class','x-tick');
+      t.textContent = xv.toLocaleString();
+      chart.appendChild(t);
+    }
+
+    // Observed PC/NC proportions from the timeline.
+    const pts = state.timeline;
+    const toPath = (points, denom) => {
+      if (!points.length || denom === 0) return '';
+      return points.map((p, i) => {
+        const x = CH_PAD_L + (p.n / chartMaxX) * CH_PLOT_W;
+        const y = CH_PAD_T + CH_PLOT_H - (p.val / denom) * CH_PLOT_H;
+        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+    };
+    actualPC.setAttribute('d', toPath(pts.map(p => ({n: p.n, val: p.pc})), pcTotal));
+    actualNC.setAttribute('d', toPath(pts.map(p => ({n: p.n, val: p.nc})), ncTotal));
+
+    // Expected: per-class subset of P(gene i KO) = 1 − (1 − sᵢ/L)ⁿ, averaged over the class.
+    const pcSizes = genes.filter(g => g.kind === 'pc').map(g => g.size);
+    const ncSizes = genes.filter(g => g.kind === 'nc').map(g => g.size);
+    const L = DNA_LENGTH;
+    const curveForSizes = (sizes) => {
+      if (!sizes.length) return '';
+      let d = '';
+      const N = 120;
+      for (let i = 0; i <= N; i++) {
+        const n = (chartMaxX * i) / N;
+        let ek = 0;
+        for (const s of sizes) ek += 1 - Math.pow(1 - s / L, n);
+        const x = CH_PAD_L + (n / chartMaxX) * CH_PLOT_W;
+        const y = CH_PAD_T + CH_PLOT_H - (ek / sizes.length) * CH_PLOT_H;
+        d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      }
+      return d;
+    };
+    expectedPC.setAttribute('d', curveForSizes(pcSizes));
+    expectedNC.setAttribute('d', curveForSizes(ncSizes));
+  }
+
+  // ---------- Simulation ----------
+  const state = { timeline: [] };
+
+  function step() {
+    const pos = randInt(0, DNA_LENGTH - 1);
+    insertions.push(pos);
+    // Determine if inside any gene (binary search since genes sorted by start)
+    let lo = 0, hi = genes.length - 1, hit = -1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      const g = genes[mid];
+      if (pos < g.start) hi = mid - 1;
+      else if (pos > g.end) lo = mid + 1;
+      else { hit = mid; break; }
+    }
+    if (hit >= 0 && !genes[hit].knocked) {
+      genes[hit].knocked = true;
+      koCount++;
+      if (genes[hit].kind === 'pc') koPC++; else koNC++;
+      setGeneKO(genes[hit].id);
+    }
+    drawInsertion(pos);
+    state.timeline.push({ n: insertions.length, ko: koCount, pc: koPC, nc: koNC });
+    updateStats();
+    redrawChart();
+
+    const stopN = Number(stopAtEl.value) || 0;
+    if (stopN > 0 && insertions.length >= stopN) pause();
+    if (koCount >= GENE_COUNT) pause();
+  }
+
+  function updateStats() {
+    statIns.textContent = insertions.length.toLocaleString();
+    statKO.textContent = `${koCount} / ${GENE_COUNT}`;
+    statKOpc.textContent = `${koPC} / ${pcTotal}`;
+    statKOnc.textContent = `${koNC} / ${ncTotal}`;
+    statProp.textContent = ((koCount / GENE_COUNT) * 100).toFixed(1) + '%';
+  }
+
+  function play() {
+    if (running) return;
+    running = true;
+    startBtn.disabled = true;
+    pauseBtn.disabled = false;
+    scheduleNext();
+  }
+
+  function pause() {
+    running = false;
+    startBtn.disabled = false;
+    pauseBtn.disabled = true;
+    if (timer) { clearTimeout(timer); timer = null; }
+  }
+
+  function scheduleNext() {
+    if (!running) return;
+    const rate = Number(speedEl.value); // per second
+    // Above ~60/s, batch multiple insertions per animation frame instead of shrinking the delay.
+    const batch = rate > 60 ? Math.ceil(rate / 60) : 1;
+    const delay = batch === 1 ? Math.max(8, 1000 / rate) : 16;
+    timer = setTimeout(() => {
+      for (let i = 0; i < batch && koCount < GENE_COUNT; i++) step();
+      scheduleNext();
+    }, delay);
+  }
+
+  function reset() {
+    pause();
+    genes = buildGenes();
+    pcTotal = genes.filter(g => g.kind === 'pc').length;
+    ncTotal = genes.filter(g => g.kind === 'nc').length;
+    insertions = [];
+    koCount = 0; koPC = 0; koNC = 0;
+    state.timeline = [{ n: 0, ko: 0, pc: 0, nc: 0 }];
+    chartMaxX = 100;
+    renderDNABase();
+    renderChartBase();
+    redrawChart();
+    updateStats();
+    updatePresetInfo();
+
+    const coding = genes.reduce((a, g) => a + g.size, 0);
+    statCoding.textContent = ((coding / DNA_LENGTH) * 100).toFixed(1) + '%';
+  }
+
+  function updatePresetInfo() {
+    const preset = PRESETS[currentPreset];
+    const pcSizes = genes.filter(g => g.kind === 'pc').map(g => g.size).sort((a, b) => a - b);
+    const ncSizes = genes.filter(g => g.kind === 'nc').map(g => g.size).sort((a, b) => a - b);
+    const med = (arr) => arr.length ? arr[Math.floor(arr.length / 2)] : null;
+    const allSizes = genes.map(g => g.size).sort((a, b) => a - b);
+    const smallest = allSizes[0];
+    // Suggested "full saturation" insertions ≈ (L / s_smallest) × H_30, as a rough budget.
+    const H30 = 3.9949;
+    const suggested = Math.round((DNA_LENGTH / smallest) * H30);
+
+    const pcLine = pcSizes.length
+      ? `<span style="color: var(--gene)">● PC:</span> ${pcSizes.length} genes, median ${fmtLen(med(pcSizes))} (range ${fmtLen(pcSizes[0])}–${fmtLen(pcSizes[pcSizes.length-1])})`
+      : `<span style="color: var(--gene)">● PC:</span> 0 genes in this window`;
+    const ncLine = ncSizes.length
+      ? `<span style="color: var(--nc)">● NC:</span> ${ncSizes.length} genes, median ${fmtLen(med(ncSizes))} (range ${fmtLen(ncSizes[0])}–${fmtLen(ncSizes[ncSizes.length-1])})`
+      : `<span style="color: var(--nc)">● NC:</span> 0 genes in this window`;
+
+    presetInfo.innerHTML =
+      `<b style="color: ${SPECIES_COLORS[currentPreset]}">${preset.label}</b> · ${preset.note}<br>` +
+      `<span style="color: var(--muted)">Window ${fmtLen(DNA_LENGTH)} · ${pcLine} · ${ncLine} · ` +
+      `≈${suggested.toLocaleString()} insertions for near-full saturation.</span>`;
+  }
+
+  // ---------- Wire up ----------
+  startBtn.addEventListener('click', play);
+  pauseBtn.addEventListener('click', pause);
+  stepBtn.addEventListener('click', () => { if (koCount < GENE_COUNT) step(); });
+  resetBtn.addEventListener('click', reset);
+  speedEl.addEventListener('input', () => {
+    speedVal.textContent = speedEl.value + '/s';
+  });
+  presetEl.addEventListener('change', () => {
+    currentPreset = presetEl.value;
+    presetEl.style.color = SPECIES_COLORS[currentPreset];
+    reset();
+  });
+
+  presetEl.value = currentPreset;
+  presetEl.style.color = SPECIES_COLORS[currentPreset];
+  reset();
+})();
+</script>
+</body>
+</html>

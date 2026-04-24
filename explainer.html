@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Why 1 − (1 − p)ⁿ? · A-level explainer</title>
+<style>
+  :root {
+    --bg: #0f1220;
+    --panel: #171a2e;
+    --ink: #e6e9f5;
+    --muted: #8b93b5;
+    --accent: #4cc9f0;
+    --hit: #ef476f;
+    --miss: #2a2f55;
+    --good: #06d6a0;
+    --gene: #3a86ff;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+  }
+  header {
+    padding: 24px 32px 8px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  header .nav { font-size: 13px; margin-bottom: 10px; }
+  header .nav a { color: var(--accent); text-decoration: none; margin-right: 16px; }
+  header .nav a:hover { text-decoration: underline; }
+  h1 { margin: 0; font-weight: 600; font-size: 26px; }
+  h2 { font-weight: 600; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 8px 32px 64px;
+    display: grid;
+    gap: 20px;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid #232746;
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .formula {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #1c2040;
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: inline-block;
+    margin: 6px 0;
+    font-size: 15px;
+  }
+  .big-formula {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #1c2040;
+    border: 1px solid #2a2f55;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 20px;
+    text-align: center;
+    margin: 12px 0;
+    color: var(--good);
+  }
+  ul, ol { padding-left: 22px; }
+  li { margin: 4px 0; }
+  p { margin: 8px 0; }
+  .step {
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+    margin: 16px 0;
+  }
+  .note {
+    background: #1c2040;
+    border-left: 3px solid var(--good);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin: 8px 0 14px; }
+  .controls label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+  input[type="range"] { accent-color: var(--accent); width: 200px; }
+  .val { color: var(--ink); font-variant-numeric: tabular-nums; min-width: 5ch; display: inline-block; text-align: right; }
+  button {
+    background: var(--accent); color: #06121a; border: 0;
+    padding: 7px 14px; border-radius: 6px;
+    font-weight: 600; cursor: pointer; font-size: 13px;
+  }
+  button.secondary { background: #2a2f55; color: var(--ink); }
+  table {
+    border-collapse: collapse; margin: 10px 0;
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 6px 12px; border-bottom: 1px solid #232746;
+    text-align: right;
+  }
+  th { color: var(--muted); font-weight: 500; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  svg { display: block; }
+  .caption { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
+  .inline-code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: #1c2040; padding: 1px 6px; border-radius: 3px;
+    font-size: 0.92em;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="index.html">← Back to simulation</a>
+  </div>
+  <h1>Where does <span style="color: var(--good)">1 − (1 − p)ⁿ</span> come from?</h1>
+  <div class="sub">An A-level walk-through of the geometric CDF — the formula behind the expected-knockout curve.</div>
+</header>
+
+<main>
+
+  <!-- Section 1: Setup -->
+  <section class="panel">
+    <h2>1. The question</h2>
+    <p>Imagine throwing darts at a wall. Somewhere on the wall there is a small <b style="color: var(--hit)">target</b>.
+    Each throw lands at a completely random spot on the wall.</p>
+    <p>If you throw <b>n</b> darts, what is the probability that <b>at least one</b> hits the target?</p>
+    <p class="note">This is the same question as: if random insertions are scattered along a DNA segment, what is the probability a given gene gets hit at least once?</p>
+  </section>
+
+  <!-- Section 2: One throw -->
+  <section class="panel">
+    <h2>2. One throw</h2>
+    <p>Let the target cover a fraction <span class="inline-code">p</span> of the wall's area. Then for a single random throw:</p>
+    <div class="formula">P(hit) = p</div>
+    &nbsp;&nbsp;
+    <div class="formula">P(miss) = 1 − p</div>
+
+    <div style="margin-top: 14px;">
+      <svg width="720" height="150" viewBox="0 0 720 150" aria-label="Wall with target">
+        <rect x="10" y="10" width="700" height="130" fill="#2a2f55" rx="6"/>
+        <rect id="dartTarget" x="300" y="40" width="120" height="70" fill="#ef476f" rx="4"/>
+        <text x="360" y="82" text-anchor="middle" fill="#fff" font-size="13" font-weight="600" pointer-events="none">target</text>
+        <text x="30" y="32" fill="#8b93b5" font-size="12">wall (whole area)</text>
+      </svg>
+      <div class="caption">Fraction of wall covered by the target = p.</div>
+    </div>
+  </section>
+
+  <!-- Section 3: Multiple throws -->
+  <section class="panel">
+    <h2>3. Throwing <i>n</i> darts — the independence trick</h2>
+    <p>Each throw is independent. So the probability that <b>all n</b> darts miss is the miss-probability multiplied by itself <b>n</b> times:</p>
+    <div class="formula">P(all n miss) = (1 − p) × (1 − p) × … × (1 − p) &nbsp;=&nbsp; (1 − p)<sup>n</sup></div>
+
+    <p>Now use the <b>complement rule</b>: "at least one hit" is the opposite of "every single one missed", so</p>
+
+    <div class="big-formula">P(at least one hit in n throws) = 1 − (1 − p)<sup>n</sup></div>
+
+    <p class="note">That's it — the whole formula. It's the CDF of the <b>geometric distribution</b>, which asks: "by throw number n, have we had our first success?"</p>
+  </section>
+
+  <!-- Section 4: Interactive -->
+  <section class="panel">
+    <h2>4. Play with it</h2>
+    <p>Move the sliders and watch the probability change.</p>
+
+    <div class="controls">
+      <label>p (target fraction): <input id="p" type="range" min="0.001" max="0.5" step="0.001" value="0.05" />
+        <span class="val" id="pVal">0.050</span></label>
+      <label>n (throws): <input id="n" type="range" min="1" max="200" step="1" value="20" />
+        <span class="val" id="nVal">20</span></label>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+      <div>
+        <svg id="wall" width="500" height="260" viewBox="0 0 500 260" aria-label="Simulation wall"></svg>
+        <div class="caption">Darts landing randomly. Red = hit, grey = miss.</div>
+        <div style="text-align: center; margin-top: 8px;">
+          <button id="throwBtn">Throw new darts</button>
+        </div>
+      </div>
+      <div>
+        <svg id="probCurve" width="500" height="260" viewBox="0 0 500 260" aria-label="Probability curve"></svg>
+        <div class="caption">P(at least one hit) as n increases. Dot = current n.</div>
+      </div>
+    </div>
+
+    <div id="readout" style="margin-top: 12px; font-size: 15px;"></div>
+  </section>
+
+  <!-- Section 5: Numeric example -->
+  <section class="panel">
+    <h2>5. A worked example</h2>
+    <p>Suppose a gene covers <b>2%</b> of a DNA segment, so <span class="inline-code">p = 0.02</span>. Then after <i>n</i> random insertions:</p>
+
+    <table>
+      <thead>
+        <tr><th>n (insertions)</th><th>(1 − p)<sup>n</sup></th><th>P(gene knocked out)</th></tr>
+      </thead>
+      <tbody id="exampleTable"></tbody>
+    </table>
+
+    <p>Notice how quickly the probability climbs — but it only <i>approaches</i> 1, it never quite reaches it. There is always a tiny chance a gene survives, even after hundreds of insertions.</p>
+  </section>
+
+  <!-- Section 6: Linking to 30 genes -->
+  <section class="panel">
+    <h2>6. From one gene to thirty</h2>
+    <p>The simulation has 30 genes with different sizes <span class="inline-code">s₁, s₂, …, s₃₀</span>, on DNA of total length <span class="inline-code">L</span>. For gene <i>i</i>, its "target fraction" is</p>
+    <div class="formula">p<sub>i</sub> = s<sub>i</sub> / L</div>
+    <p>so the probability that gene <i>i</i> has been knocked out by insertion number <i>n</i> is</p>
+    <div class="formula">P(gene i KO) = 1 − (1 − s<sub>i</sub>/L)<sup>n</sup></div>
+
+    <p>The <b>expected number</b> of knocked-out genes is just the sum of these probabilities (by linearity of expectation — a result that works even though the events aren't fully independent):</p>
+
+    <div class="big-formula">E[K(n)] = Σ<sub>i=1</sub><sup>30</sup> [ 1 − (1 − s<sub>i</sub>/L)<sup>n</sup> ]</div>
+
+    <p>That sum is exactly what the green dashed line on the simulation plots. Each gene contributes its own geometric CDF; because smaller genes have smaller <span class="inline-code">p<sub>i</sub></span>, they take longer to saturate, which is why the last genes to be knocked out are almost always the tiny ones.</p>
+  </section>
+
+  <!-- Section 7: Sanity checks -->
+  <section class="panel">
+    <h2>7. Sanity checks</h2>
+    <ul>
+      <li><b>n = 0:</b> formula gives <span class="inline-code">1 − (1 − p)⁰ = 1 − 1 = 0</span>. ✓ No throws, no hits.</li>
+      <li><b>p = 0:</b> formula gives <span class="inline-code">1 − 1ⁿ = 0</span>. ✓ Zero-size target, impossible to hit.</li>
+      <li><b>p = 1:</b> formula gives <span class="inline-code">1 − 0 = 1</span> for any n ≥ 1. ✓ Target covers the whole wall.</li>
+      <li><b>n → ∞:</b> <span class="inline-code">(1 − p)<sup>n</sup> → 0</span>, so probability → 1. ✓ Given enough throws, you will eventually hit.</li>
+    </ul>
+  </section>
+
+  <section class="panel" style="background: transparent; border: 0; text-align: center;">
+    <a href="index.html" style="color: var(--accent); text-decoration: none; font-size: 14px;">← Back to the simulation</a>
+  </section>
+
+</main>
+
+<script>
+(() => {
+  const p = document.getElementById('p');
+  const n = document.getElementById('n');
+  const pVal = document.getElementById('pVal');
+  const nVal = document.getElementById('nVal');
+  const wall = document.getElementById('wall');
+  const probCurve = document.getElementById('probCurve');
+  const readout = document.getElementById('readout');
+  const throwBtn = document.getElementById('throwBtn');
+
+  // Wall config
+  const W = 500, H = 260;
+  // Target positioned in the middle of the wall; size driven by p (area fraction)
+  function targetRect(pVal) {
+    // Keep rectangle's aspect ratio same as wall.
+    const area = W * H * pVal;
+    const ratio = W / H;
+    const th = Math.sqrt(area / ratio);
+    const tw = ratio * th;
+    return {
+      x: (W - tw) / 2,
+      y: (H - th) / 2,
+      w: tw,
+      h: th
+    };
+  }
+
+  let darts = [];
+  function regenerateDarts() {
+    const N = Number(n.value);
+    darts = [];
+    for (let i = 0; i < N; i++) {
+      darts.push({ x: Math.random() * W, y: Math.random() * H });
+    }
+    renderWall();
+  }
+
+  function renderWall() {
+    const pv = Number(p.value);
+    const N = Number(n.value);
+    const t = targetRect(pv);
+    let svg = '';
+    svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#2a2f55" rx="6"/>`;
+    svg += `<rect x="${t.x}" y="${t.y}" width="${t.w}" height="${t.h}" fill="#ef476f" opacity="0.85" rx="3"/>`;
+    let hits = 0;
+    // Use only the first N darts
+    for (let i = 0; i < N && i < darts.length; i++) {
+      const d = darts[i];
+      const hit = d.x >= t.x && d.x <= t.x + t.w && d.y >= t.y && d.y <= t.y + t.h;
+      if (hit) hits++;
+      svg += `<circle cx="${d.x.toFixed(1)}" cy="${d.y.toFixed(1)}" r="2.5" fill="${hit ? '#ffd166' : '#8b93b5'}" opacity="${hit ? 1 : 0.55}"/>`;
+    }
+    wall.innerHTML = svg;
+    return hits;
+  }
+
+  function renderCurve() {
+    const pv = Number(p.value);
+    const N = Number(n.value);
+    const PAD_L = 48, PAD_R = 14, PAD_T = 18, PAD_B = 34;
+    const PW = W - PAD_L - PAD_R;
+    const PH = H - PAD_T - PAD_B;
+
+    const xMax = Math.max(Number(n.max), N);
+    const xScale = x => PAD_L + (x / xMax) * PW;
+    const yScale = y => PAD_T + (1 - y) * PH;
+
+    let svg = '';
+    // axes
+    svg += `<line x1="${PAD_L}" y1="${PAD_T}" x2="${PAD_L}" y2="${PAD_T+PH}" stroke="#3a3f66"/>`;
+    svg += `<line x1="${PAD_L}" y1="${PAD_T+PH}" x2="${PAD_L+PW}" y2="${PAD_T+PH}" stroke="#3a3f66"/>`;
+    // y labels
+    for (let q = 0; q <= 1.0001; q += 0.25) {
+      const y = yScale(q);
+      svg += `<line x1="${PAD_L}" y1="${y}" x2="${PAD_L+PW}" y2="${y}" stroke="#23274a" stroke-dasharray="3,3"/>`;
+      svg += `<text x="${PAD_L-6}" y="${y+4}" fill="#8b93b5" font-size="11" text-anchor="end">${(q*100).toFixed(0)}%</text>`;
+    }
+    // x labels
+    for (let i = 0; i <= 4; i++) {
+      const xv = Math.round((xMax * i) / 4);
+      const x = xScale(xv);
+      svg += `<text x="${x}" y="${PAD_T+PH+16}" fill="#8b93b5" font-size="11" text-anchor="middle">${xv}</text>`;
+    }
+    // curve
+    let d = '';
+    const STEPS = 200;
+    for (let i = 0; i <= STEPS; i++) {
+      const xv = (xMax * i) / STEPS;
+      const yv = 1 - Math.pow(1 - pv, xv);
+      d += (i === 0 ? 'M' : 'L') + xScale(xv).toFixed(1) + ',' + yScale(yv).toFixed(1) + ' ';
+    }
+    svg += `<path d="${d}" fill="none" stroke="#06d6a0" stroke-width="2"/>`;
+    // current point
+    const curY = 1 - Math.pow(1 - pv, N);
+    svg += `<circle cx="${xScale(N)}" cy="${yScale(curY)}" r="5" fill="#4cc9f0" stroke="#0f1220" stroke-width="2"/>`;
+    svg += `<text x="${xScale(N) + 10}" y="${yScale(curY) - 8}" fill="#4cc9f0" font-size="12" font-weight="600">${(curY*100).toFixed(1)}%</text>`;
+
+    // Axis titles
+    svg += `<text x="${PAD_L+PW/2}" y="${H-6}" fill="#8b93b5" font-size="11" text-anchor="middle">n (throws)</text>`;
+
+    probCurve.innerHTML = svg;
+  }
+
+  function updateReadout() {
+    const pv = Number(p.value);
+    const N = Number(n.value);
+    const theoretical = 1 - Math.pow(1 - pv, N);
+    const hits = renderWall();
+    const empirical = hits > 0 ? 1 : 0;
+    readout.innerHTML =
+      `<b>Formula:</b> 1 − (1 − ${pv.toFixed(3)})<sup>${N}</sup> = <b style="color: var(--good)">${(theoretical*100).toFixed(2)}%</b> &nbsp; · &nbsp;
+       <b>This sample:</b> ${hits} of ${N} darts hit the target → ${hits > 0 ? 'at least one hit ✓' : 'all missed'}.`;
+    renderCurve();
+  }
+
+  p.addEventListener('input', () => {
+    pVal.textContent = Number(p.value).toFixed(3);
+    updateReadout();
+  });
+  n.addEventListener('input', () => {
+    nVal.textContent = n.value;
+    // Top up darts if n grew beyond current list
+    while (darts.length < Number(n.value)) {
+      darts.push({ x: Math.random() * W, y: Math.random() * H });
+    }
+    updateReadout();
+  });
+  throwBtn.addEventListener('click', () => { regenerateDarts(); updateReadout(); });
+
+  // Numeric example table (p = 0.02)
+  const examplePs = [1, 5, 10, 25, 50, 100, 200, 500];
+  const pExample = 0.02;
+  const tbody = document.getElementById('exampleTable');
+  let rows = '';
+  for (const nn of examplePs) {
+    const surv = Math.pow(1 - pExample, nn);
+    rows += `<tr><td>${nn}</td><td>${surv.toFixed(4)}</td><td>${((1-surv)*100).toFixed(2)}%</td></tr>`;
+  }
+  tbody.innerHTML = rows;
+
+  // Init
+  pVal.textContent = Number(p.value).toFixed(3);
+  nVal.textContent = n.value;
+  regenerateDarts();
+  updateReadout();
+})();
+</script>
+</body>
+</html>
