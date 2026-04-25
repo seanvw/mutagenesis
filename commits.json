@@ -1,5 +1,23 @@
 [
   {
+    "sha": "4d31413f2b22df7dec389c502eaa4478d377f3a6",
+    "short_sha": "4d31413",
+    "subject": "Add caveat to dart analogy in explainer",
+    "body": "Real dart throwers aren't uniform random \u2014 even bad players cluster\ntheir throws. Note acknowledges the idealisation, points to better\nmental pictures (raindrops, blindfolded buckshot), and flags the\nparallel non-uniformity in real insertional mutagens.\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:39:41+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/4d31413f2b22df7dec389c502eaa4478d377f3a6"
+  },
+  {
+    "sha": "6697ae8de4ccbb405738cb5332d39757b595e610",
+    "short_sha": "6697ae8",
+    "subject": "Refresh commits.json",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:30:14+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/6697ae8de4ccbb405738cb5332d39757b595e610"
+  },
+  {
     "sha": "246406b079e4489a983f26171628e3857ccefd5b",
     "short_sha": "246406b",
     "subject": "Add C. ruddii and P. japonica presets to simulation",
