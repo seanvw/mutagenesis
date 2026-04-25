@@ -1,5 +1,23 @@
 [
   {
+    "sha": "5d12e32a2fc56848515c4234ca11901b04c46f70",
+    "short_sha": "5d12e32",
+    "subject": "Add Biology page with cross-species gene-density table",
+    "body": "Three paragraphs covering insertional mutagenesis, the saturation\ncurve, and the C-value paradox; plus a 10-species reference table\nspanning the densest (Carsonella ruddii, ~1,140 genes/Mb) and\nsparsest (Paris japonica, Protopterus aethiopicus, < 0.3 genes/Mb)\nknown cellular genomes. Nav threaded into all four pages.\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:21:21+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/5d12e32a2fc56848515c4234ca11901b04c46f70"
+  },
+  {
+    "sha": "5ee919e23fd6bfe862578c935544ebb4fd528259",
+    "short_sha": "5ee919e",
+    "subject": "Add Checkpoints page with build-time git log snapshot",
+    "body": "- checkpoints.html lists commits sourced from commits.json\n- build-commits.py regenerates commits.json from `git log` so the\n  page works without GitHub API access (repo is private)\n- Add Checkpoints link to nav on simulation and explainer pages\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:11:38+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/5ee919e23fd6bfe862578c935544ebb4fd528259"
+  },
+  {
     "sha": "828f0c63e4744c70f93526a8af5d108ea47d5303",
     "short_sha": "828f0c6",
     "subject": "Add top nav, custom species dropdown, dev serve script",
