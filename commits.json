@@ -1,0 +1,38 @@
+[
+  {
+    "sha": "828f0c63e4744c70f93526a8af5d108ea47d5303",
+    "short_sha": "828f0c6",
+    "subject": "Add top nav, custom species dropdown, dev serve script",
+    "body": "- Unified top navigation bar across simulation and explainer pages\n- Replace native <select> with a custom dropdown so each species\n  name renders in its accent colour (Safari/macOS ignore option\n  colours on native selects)\n- Add serve.sh for local development on http://localhost:8000\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T09:58:00+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/828f0c63e4744c70f93526a8af5d108ea47d5303"
+  },
+  {
+    "sha": "e599a5f14b9339399ee5633e9e35c6ec28bb26f8",
+    "short_sha": "e599a5f",
+    "subject": "Add GitHub repo link to index.html subtitle",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-24T23:34:24+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/e599a5f14b9339399ee5633e9e35c6ec28bb26f8"
+  },
+  {
+    "sha": "b8c3d9ce07cbd5675a552d32c5b243e96bea9fcf",
+    "short_sha": "b8c3d9c",
+    "subject": "Add README",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-24T23:28:03+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/b8c3d9ce07cbd5675a552d32c5b243e96bea9fcf"
+  },
+  {
+    "sha": "328992e93a43b7781ed44355bfa48ca0cf80c550",
+    "short_sha": "328992e",
+    "subject": "Initial commit: insertional mutagenesis simulation",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-24T23:26:40+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/328992e93a43b7781ed44355bfa48ca0cf80c550"
+  }
+]
