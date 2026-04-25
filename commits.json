@@ -1,5 +1,23 @@
 [
   {
+    "sha": "246406b079e4489a983f26171628e3857ccefd5b",
+    "short_sha": "246406b",
+    "subject": "Add C. ruddii and P. japonica presets to simulation",
+    "body": "Extends the species selector to span the known extremes of cellular\ngene density \u2014 Carsonella ruddii PV at ~95% genic (densest known)\nand Paris japonica at ~3% (sparsest known plant). Dropdown now\nordered densest-first. Kingdom-matched colours: bacteria in pinks\n(C. ruddii hot pink, E. coli mid pink), plants in greens\n(A. thaliana bright leaf, P. japonica deep forest).\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:30:14+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/246406b079e4489a983f26171628e3857ccefd5b"
+  },
+  {
+    "sha": "2ae00ebd8e54ef5fab202abc3e3a6e10ba6295dd",
+    "short_sha": "2ae00eb",
+    "subject": "Refresh commits.json",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:21:39+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/2ae00ebd8e54ef5fab202abc3e3a6e10ba6295dd"
+  },
+  {
     "sha": "5d12e32a2fc56848515c4234ca11901b04c46f70",
     "short_sha": "5d12e32",
     "subject": "Add Biology page with cross-species gene-density table",
