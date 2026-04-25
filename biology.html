@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Biology — Insertional Mutagenesis</title>
+<style>
+  :root {
+    --bg: #0f1220;
+    --panel: #171a2e;
+    --ink: #e6e9f5;
+    --muted: #8b93b5;
+    --accent: #4cc9f0;
+    --good: #06d6a0;
+    --gene: #3a86ff;
+    --nc: #ff9f1c;
+    --extreme-hi: #e0a84a;
+    --extreme-lo: #b088f9;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .nav {
+    display: flex;
+    gap: 18px;
+    padding: 10px 32px;
+    background: var(--panel);
+    border-bottom: 1px solid #232746;
+    font-size: 13px;
+  }
+  .nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nav a:hover { text-decoration: underline; }
+  .nav a.active { color: var(--ink); }
+  .nav .spacer { flex: 1; }
+
+  header { padding: 24px 32px 8px; max-width: 1100px; margin: 0 auto; }
+  h1 { margin: 0; font-weight: 600; font-size: 26px; }
+  h2 { font-weight: 600; font-size: 18px; margin: 24px 0 10px; color: var(--ink); }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  main {
+    display: grid;
+    gap: 16px;
+    padding: 16px 32px 48px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid #232746;
+    border-radius: 10px;
+    padding: 18px 24px;
+  }
+  .prose p { line-height: 1.65; font-size: 14px; color: #d8dcef; margin: 0 0 14px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose i { color: var(--ink); }
+  .prose code { font-size: 13px; background: #1c2040; padding: 1px 5px; border-radius: 3px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 10px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #1f2342; }
+  th {
+    text-align: left;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #2a2f55;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; }
+  th.num { text-align: right; }
+  td.species i { color: var(--ink); }
+  td.note { color: var(--muted); font-size: 12px; }
+
+  tr.extreme-hi td:first-child { box-shadow: inset 3px 0 0 var(--extreme-hi); }
+  tr.extreme-lo td:first-child { box-shadow: inset 3px 0 0 var(--extreme-lo); }
+
+  .legend {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+    border-radius: 2px;
+  }
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+  @media (max-width: 800px) { .summary { grid-template-columns: 1fr; } }
+  .stat {
+    background: #1c2040;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat .v { font-size: 18px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .stat .v small { font-weight: 400; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">Simulation</a>
+  <a href="explainer.html">Explainer</a>
+  <a href="biology.html" class="active">Biology</a>
+  <a href="checkpoints.html">Checkpoints</a>
+  <span class="spacer"></span>
+  <a href="https://github.com/seanvw/mutagenesis" target="_blank" rel="noopener">GitHub ↗</a>
+</nav>
+
+<header>
+  <h1>The biology behind the simulation</h1>
+  <div class="sub">What insertional mutagenesis is, why it follows the curve, and how gene density spans roughly four orders of magnitude across cellular life.</div>
+</header>
+
+<main>
+  <section class="panel prose">
+    <h2>What is insertional mutagenesis?</h2>
+    <p>Insertional mutagenesis is a forward-genetic technique in which a fragment of foreign DNA — a <i>transposable element</i> (Tn5, P-element, <i>piggyBac</i>, <i>Sleeping Beauty</i>), a retroviral provirus, T-DNA delivered by <i>Agrobacterium tumefaciens</i>, or a synthetic gene-trap cassette — is introduced into a host and integrates into its genome at near-random positions. When an insert lands inside a gene's body it disrupts the gene: a premature stop, a frameshift, a fractured intron, or a strong promoter trap is enough to abolish or alter the protein product. Crucially, every mutant now carries a known DNA tag, so once a phenotype is observed the responsible gene can be cloned by sequencing the regions flanking the insertion. This makes insertional screens fundamentally different from chemical mutagenesis (EMS, ENU), where each mutation is a single base change that must be mapped by linkage.</p>
+
+    <h2>Why the saturation curve has the shape it does</h2>
+    <p>For one insertion at a uniformly random base, the probability of hitting a specific gene equals that gene's body length divided by the genome size — call it <code>p = s / L</code>. After <code>n</code> independent insertions the gene is still untouched with probability <code>(1 − p)ⁿ</code>, so the probability that it has been knocked out at least once is <code>1 − (1 − p)ⁿ</code>. Average this over every gene in a class (all protein-coding genes, say) and you get the expected knockout fraction the simulation plots as a dashed line. Two practical consequences fall out: long genes saturate first because they are bigger targets, and gene density sets the absolute number of insertions needed for a useful screen — orders of magnitude more in a sparse vertebrate genome than in a compact bacterial one. The convexity of the curve is also why the marginal yield drops steeply: the first thousand insertions do far more useful work than the millionth.</p>
+
+    <h2>Why density varies so wildly across species</h2>
+    <p>Genome size and gene count are decoupled — the celebrated <i>C-value paradox</i>. Bacterial genomes are essentially wall-to-wall genes, and the smallest known cellular genomes belong to obligate endosymbionts that have shed everything their host can supply: <i>Carsonella ruddii</i> (160 kb, ~180 genes) and <i>Nasuia deltocephalinicola</i> (112 kb) pack coding sequence into more than 95% of their DNA. At the other extreme, the marbled lungfish (<i>Protopterus aethiopicus</i>, ~130 Gb) and the plant <i>Paris japonica</i> (~149 Gb) have genomes thousands of times the size of a human's without proportionally more genes — the bulk is repetitive elements, transposon graveyards, expanded introns, and other non-coding DNA. The same number of random insertions will saturate <i>Carsonella</i> almost completely while sampling only a tiny fraction of <i>Paris japonica</i>'s gene set. The species selector in the simulation lets you watch this play out: <i>E. coli</i>'s curves climb to 100% within thousands of insertions, while the human curves still have room to grow at <code>n</code> = 100,000.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Gene density across species</h2>
+    <p style="font-size: 13px; color: var(--muted); margin: 0;">Selected reference genomes ordered from densest to sparsest. <i>Genes/Mb</i> is total annotated genes (protein-coding + ncRNA) per megabase. <i>Genic %</i> is the fraction of the genome occupied by gene bodies including introns. Numbers are rounded; sources noted below.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Species</th>
+          <th>Domain</th>
+          <th class="num">Genome size</th>
+          <th class="num">Total genes</th>
+          <th class="num">% ncRNA</th>
+          <th class="num">Genes / Mb</th>
+          <th class="num">Genic %</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="extreme-hi">
+          <td class="species"><i>Carsonella ruddii</i> PV</td>
+          <td>Bacteria</td>
+          <td class="num">160 kb</td>
+          <td class="num">182</td>
+          <td class="num">~2%</td>
+          <td class="num">~1,140</td>
+          <td class="num">~97%</td>
+          <td class="note">Densest known cellular genome (psyllid endosymbiont)</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Mycoplasma genitalium</i> G37</td>
+          <td>Bacteria</td>
+          <td class="num">580 kb</td>
+          <td class="num">525</td>
+          <td class="num">~7%</td>
+          <td class="num">~905</td>
+          <td class="num">~89%</td>
+          <td class="note">Smallest free-living bacterium often cited as a minimal cell</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Escherichia coli</i> K-12</td>
+          <td>Bacteria</td>
+          <td class="num">4.64 Mb</td>
+          <td class="num">~4,460</td>
+          <td class="num">~4%</td>
+          <td class="num">~960</td>
+          <td class="num">~88%</td>
+          <td class="note">Operons packed back-to-back; the canonical model bacterium</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Saccharomyces cerevisiae</i></td>
+          <td>Fungi</td>
+          <td class="num">12.1 Mb</td>
+          <td class="num">~6,600</td>
+          <td class="num">~13%</td>
+          <td class="num">~545</td>
+          <td class="num">~72%</td>
+          <td class="note">Introns rare; densest commonly studied eukaryote</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Caenorhabditis elegans</i></td>
+          <td>Animalia</td>
+          <td class="num">100 Mb</td>
+          <td class="num">~24,000</td>
+          <td class="num">~17%</td>
+          <td class="num">~240</td>
+          <td class="num">~27%</td>
+          <td class="note">Compact for a metazoan; small introns</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Arabidopsis thaliana</i></td>
+          <td>Plantae</td>
+          <td class="num">135 Mb</td>
+          <td class="num">~32,800</td>
+          <td class="num">~16%</td>
+          <td class="num">~245</td>
+          <td class="num">~50%</td>
+          <td class="note">Reference angiosperm; kilobase intergenic gaps</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Drosophila melanogaster</i></td>
+          <td>Animalia</td>
+          <td class="num">144 Mb</td>
+          <td class="num">~17,500</td>
+          <td class="num">~20%</td>
+          <td class="num">~120</td>
+          <td class="num">~30%</td>
+          <td class="note">Long-running insertional screen target (P-element, <i>piggyBac</i>)</td>
+        </tr>
+        <tr>
+          <td class="species"><i>Homo sapiens</i></td>
+          <td>Animalia</td>
+          <td class="num">3.10 Gb</td>
+          <td class="num">~44,800</td>
+          <td class="num">~55%</td>
+          <td class="num">~14</td>
+          <td class="num">~45%</td>
+          <td class="note">PC exons cover only ~1.5%; introns inflate "genic" fraction</td>
+        </tr>
+        <tr class="extreme-lo">
+          <td class="species"><i>Protopterus aethiopicus</i></td>
+          <td>Animalia</td>
+          <td class="num">~130 Gb</td>
+          <td class="num">~20–30k</td>
+          <td class="num">—</td>
+          <td class="num">&lt; 0.3</td>
+          <td class="num">&lt; 5%</td>
+          <td class="note">Marbled lungfish — largest known animal genome</td>
+        </tr>
+        <tr class="extreme-lo">
+          <td class="species"><i>Paris japonica</i></td>
+          <td>Plantae</td>
+          <td class="num">~149 Gb</td>
+          <td class="num">~30k (est.)</td>
+          <td class="num">—</td>
+          <td class="num">&lt; 0.3</td>
+          <td class="num">&lt; 5%</td>
+          <td class="note">Largest known eukaryotic genome (Japanese canopy plant)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="legend">
+      <span><span class="swatch" style="background: var(--extreme-hi)"></span>Densest known</span>
+      &nbsp;&nbsp;
+      <span><span class="swatch" style="background: var(--extreme-lo)"></span>Sparsest known</span>
+    </div>
+
+    <div class="summary">
+      <div class="stat">
+        <div class="k">Gene density range</div>
+        <div class="v">~3,800×<small> &middot; <i>Carsonella</i> vs <i>Paris</i></small></div>
+      </div>
+      <div class="stat">
+        <div class="k">Genome size range</div>
+        <div class="v">~10⁶×<small> &middot; 160 kb → 149 Gb</small></div>
+      </div>
+      <div class="stat">
+        <div class="k">Coefficient of variation, genic %</div>
+        <div class="v">~0.85<small> &middot; across the 10 species</small></div>
+      </div>
+    </div>
+
+    <p class="legend" style="margin-top: 18px;">
+      Sources: NCBI RefSeq, Ensembl, Araport11, WormBase, FlyBase, GENCODE 45, and the original genome papers — <i>Carsonella ruddii</i> (Nakabachi <i>et al.</i> 2006), <i>Mycoplasma genitalium</i> (Fraser <i>et al.</i> 1995), <i>P. aethiopicus</i> C-value (Pedersen 1971; Meyer <i>et al.</i> 2021 for related species), <i>Paris japonica</i> C-value (Pellicer <i>et al.</i> 2010). Gene counts for the two extreme low-density species are approximate — annotation is incomplete and most of the genome is repetitive DNA.
+    </p>
+  </section>
+</main>
+</body>
+</html>
