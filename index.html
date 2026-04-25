@@ -30,6 +30,22 @@
   }
   h1 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: 0.2px; }
   .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .nav {
+    display: flex;
+    gap: 18px;
+    padding: 10px 32px;
+    background: var(--panel);
+    border-bottom: 1px solid #232746;
+    font-size: 13px;
+  }
+  .nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nav a:hover { text-decoration: underline; }
+  .nav a.active { color: var(--ink); }
+  .nav .spacer { flex: 1; }
 
   main {
     display: grid;
@@ -102,24 +118,30 @@
 </style>
 </head>
 <body>
+<nav class="nav">
+  <a href="index.html" class="active">Simulation</a>
+  <a href="explainer.html">Explainer</a>
+  <span class="spacer"></span>
+  <a href="https://github.com/seanvw/mutagenesis" target="_blank" rel="noopener">GitHub ↗</a>
+</nav>
 <header>
   <h1>Insertional Mutagenesis Simulation</h1>
-  <div class="sub">Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution. Any insertion landing inside a gene knocks it out. &nbsp;<a href="explainer.html" style="color: var(--accent);">Why the expected curve looks like that →</a> &nbsp;<a href="https://github.com/seanvw/mutagenesis" style="color: var(--accent);">Source on GitHub →</a></div>
+  <div class="sub">Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution. Any insertion landing inside a gene knocks it out. &nbsp;<a href="explainer.html" style="color: var(--accent);">Why the expected curve looks like that →</a></div>
 </header>
 
 <main>
   <section class="panel">
     <div class="controls">
-      <label style="flex-direction: column; align-items: flex-start; gap: 4px;">
-        <span style="font-size:11px; text-transform: uppercase; letter-spacing: 0.08em;">Gene distribution</span>
-        <select id="preset" style="background:#1c2040; border:1px solid #2a2f55; border-radius:4px; padding:6px 8px; font-size: 13px; font-weight: 600;">
-          <option value="yeast"       style="color:#e0a84a; background:#1c2040;">S. cerevisiae — baker's yeast (dense)</option>
-          <option value="arabidopsis" style="color:#5cbf3e; background:#1c2040;">A. thaliana — thale cress (moderate)</option>
-          <option value="ecoli"       style="color:#e85a85; background:#1c2040;">E. coli — bacterium (very dense)</option>
-          <option value="human"       style="color:#b088f9; background:#1c2040;">H. sapiens — gene bodies (sparse)</option>
-          <option value="synthetic"   style="color:#9aa1b8; background:#1c2040;">Synthetic (arbitrary)</option>
-        </select>
-      </label>
+      <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px;">
+        <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted);">Gene distribution</span>
+        <div id="presetWrap" style="position:relative;">
+          <button id="presetBtn" type="button" style="background:#1c2040; border:1px solid #2a2f55; border-radius:4px; padding:6px 10px; font-size:13px; font-weight:600; cursor:pointer; text-align:left; min-width:320px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <span id="presetLabel"></span>
+            <span style="color:var(--muted); font-size:10px;">▼</span>
+          </button>
+          <div id="presetMenu" role="listbox" style="position:absolute; top:calc(100% + 4px); left:0; background:#1c2040; border:1px solid #2a2f55; border-radius:4px; min-width:100%; z-index:10; display:none; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.4);"></div>
+        </div>
+      </div>
       <button id="startBtn">Start</button>
       <button id="pauseBtn" class="secondary" disabled>Pause</button>
       <button id="stepBtn" class="secondary">Step +1</button>
@@ -334,8 +356,46 @@
   const pauseBtn = document.getElementById('pauseBtn');
   const stepBtn = document.getElementById('stepBtn');
   const resetBtn = document.getElementById('resetBtn');
-  const presetEl = document.getElementById('preset');
+  const presetWrap = document.getElementById('presetWrap');
+  const presetBtn = document.getElementById('presetBtn');
+  const presetMenu = document.getElementById('presetMenu');
+  const presetLabel = document.getElementById('presetLabel');
   const presetInfo = document.getElementById('presetInfo');
+
+  // Visible labels for the custom dropdown — kept here so the menu and the
+  // selected-value display stay in sync without duplicating strings in markup.
+  const PRESET_LABELS = {
+    yeast:       "S. cerevisiae — baker's yeast (dense)",
+    arabidopsis: "A. thaliana — thale cress (moderate)",
+    ecoli:       "E. coli — bacterium (very dense)",
+    human:       "H. sapiens — gene bodies (sparse)",
+    synthetic:   "Synthetic (arbitrary)"
+  };
+
+  function buildPresetMenu() {
+    presetMenu.innerHTML = '';
+    for (const key of Object.keys(PRESET_LABELS)) {
+      const item = document.createElement('div');
+      item.textContent = PRESET_LABELS[key];
+      item.setAttribute('role', 'option');
+      item.dataset.value = key;
+      item.style.cssText = `padding:8px 10px; cursor:pointer; color:${SPECIES_COLORS[key]}; font-weight:600; font-size:13px;`;
+      item.addEventListener('mouseenter', () => { item.style.background = '#262a4a'; });
+      item.addEventListener('mouseleave', () => { item.style.background = ''; });
+      item.addEventListener('click', () => {
+        currentPreset = key;
+        applyPresetSelection();
+        presetMenu.style.display = 'none';
+        reset();
+      });
+      presetMenu.appendChild(item);
+    }
+  }
+
+  function applyPresetSelection() {
+    presetLabel.textContent = PRESET_LABELS[currentPreset];
+    presetBtn.style.color = SPECIES_COLORS[currentPreset];
+  }
 
   // ---------- DNA rendering ----------
   const SVG_W = 1340, SVG_H = 130;
@@ -743,14 +803,18 @@
   speedEl.addEventListener('input', () => {
     speedVal.textContent = speedEl.value + '/s';
   });
-  presetEl.addEventListener('change', () => {
-    currentPreset = presetEl.value;
-    presetEl.style.color = SPECIES_COLORS[currentPreset];
-    reset();
+  presetBtn.addEventListener('click', () => {
+    presetMenu.style.display = presetMenu.style.display === 'block' ? 'none' : 'block';
+  });
+  document.addEventListener('click', (e) => {
+    if (!presetWrap.contains(e.target)) presetMenu.style.display = 'none';
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') presetMenu.style.display = 'none';
   });
 
-  presetEl.value = currentPreset;
-  presetEl.style.color = SPECIES_COLORS[currentPreset];
+  buildPresetMenu();
+  applyPresetSelection();
   reset();
 })();
 </script>
