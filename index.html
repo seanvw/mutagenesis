@@ -199,6 +199,22 @@
   // ncMedian/Sigma = non-coding size distribution (log-normal)
   // genicFraction = fraction of genome occupied by any gene body (PC + NC)
   const PRESETS = {
+    carsonella: {
+      label: "C. ruddii PV (psyllid endosymbiont)",
+      pcMedian: 800,   pcSigma: 0.4,       // 182 PC genes packed into 160 kb → tight distribution
+      ncMedian: 80,    ncSigma: 0.3,       // mostly tRNAs (~76 bp) plus a couple of rRNAs
+      ncFraction: 0.15,                     // ~31 RNAs of ~213 total annotated
+      genicFraction: 0.95,
+      note: "~160 kb · 182 PC + ~31 RNAs. Densest known cellular genome — obligate endosymbiont of psyllids that has shed everything its host can supply."
+    },
+    ecoli: {
+      label: "E. coli (bacterium)",
+      pcMedian: 900,   pcSigma: 0.35,
+      ncMedian: 100,   ncSigma: 0.55,      // tRNAs ~76 bp, rRNAs 1.5–2.9 kb, small sRNAs
+      ncFraction: 0.03,                    // ~100 ncRNAs of ~4,300
+      genicFraction: 0.88,
+      note: "~4.6 Mb · ~4,300 genes (~3% ncRNA: tRNAs, rRNAs, sRNAs). Operons packed back-to-back."
+    },
     yeast: {
       label: "S. cerevisiae (baker's yeast)",
       pcMedian: 1400,  pcSigma: 0.55,
@@ -215,14 +231,6 @@
       genicFraction: 0.40,
       note: "~135 Mb · ~27,000 PC genes + ~5,000 ncRNAs (miRNAs, lncRNAs, tRNAs). Kilobase intergenic gaps."
     },
-    ecoli: {
-      label: "E. coli (bacterium)",
-      pcMedian: 900,   pcSigma: 0.35,
-      ncMedian: 100,   ncSigma: 0.55,      // tRNAs ~76 bp, rRNAs 1.5–2.9 kb, small sRNAs
-      ncFraction: 0.03,                    // ~100 ncRNAs of ~4,300
-      genicFraction: 0.88,
-      note: "~4.6 Mb · ~4,300 genes (~3% ncRNA: tRNAs, rRNAs, sRNAs). Operons packed back-to-back."
-    },
     human: {
       label: "H. sapiens (gene bodies incl. introns)",
       pcMedian: 14000, pcSigma: 1.15,      // very wide; some PC genes ≥100 kb
@@ -230,6 +238,14 @@
       ncFraction: 0.50,                    // roughly 20k PC + 20k+ lncRNA/miRNA/other
       genicFraction: 0.45,
       note: "~3.2 Gb · ~20,000 PC + ~20,000+ ncRNAs (lncRNAs, miRNAs). Gene bodies huge, separated by 10s–100s of kb."
+    },
+    parisjaponica: {
+      label: "P. japonica (Japanese canopy plant)",
+      pcMedian: 2500,  pcSigma: 0.85,      // gene-size distribution unknown — modelled on plants
+      ncMedian: 600,   ncSigma: 1.1,
+      ncFraction: 0.18,                    // assume plant-typical; annotation is incomplete
+      genicFraction: 0.03,
+      note: "~149 Gb · gene count uncertain (~30k est.). Largest known plant genome — gene bodies are <5% of DNA, the rest is transposon-derived repeats."
     },
     synthetic: {
       label: "Synthetic (original toy)",
@@ -242,14 +258,17 @@
   };
 
   // Thematic accent colour for each species — used in the dropdown, selected value,
-  // and info line. Chosen to evoke each organism (amber yeast, leaf green,
-  // Gram-stain pink, lilac human, neutral grey for the synthetic toy).
+  // and info line. Kingdoms share a hue family: bacteria in pinks (Gram-stain),
+  // plants in greens, animals in lilacs, fungi in amber, with the synthetic toy in grey.
+  // Within a kingdom, the more extreme genome takes the more saturated/darker shade.
   const SPECIES_COLORS = {
-    yeast:       '#e0a84a',
-    arabidopsis: '#5cbf3e',
-    ecoli:       '#e85a85',
-    human:       '#b088f9',
-    synthetic:   '#9aa1b8'
+    carsonella:    '#ff5c8a',   // hot pink — extreme bacterium
+    ecoli:         '#e85a85',   // mid Gram-stain pink
+    yeast:         '#e0a84a',   // amber
+    arabidopsis:   '#5cbf3e',   // bright leaf green
+    human:         '#b088f9',   // lilac
+    parisjaponica: '#2d8a3e',   // deep forest green — extreme plant
+    synthetic:     '#9aa1b8'    // neutral grey
   };
 
   const GENE_COUNT = 30;
@@ -367,11 +386,13 @@
   // Visible labels for the custom dropdown — kept here so the menu and the
   // selected-value display stay in sync without duplicating strings in markup.
   const PRESET_LABELS = {
-    yeast:       "S. cerevisiae — baker's yeast (dense)",
-    arabidopsis: "A. thaliana — thale cress (moderate)",
-    ecoli:       "E. coli — bacterium (very dense)",
-    human:       "H. sapiens — gene bodies (sparse)",
-    synthetic:   "Synthetic (arbitrary)"
+    carsonella:    "C. ruddii — psyllid endosymbiont (densest known)",
+    ecoli:         "E. coli — bacterium (very dense)",
+    yeast:         "S. cerevisiae — baker's yeast (dense)",
+    arabidopsis:   "A. thaliana — thale cress (moderate)",
+    human:         "H. sapiens — gene bodies (sparse)",
+    parisjaponica: "P. japonica — Japanese canopy plant (sparsest known)",
+    synthetic:     "Synthetic (arbitrary)"
   };
 
   function buildPresetMenu() {
