@@ -96,6 +96,14 @@
     font-size: 14px;
     color: var(--ink);
   }
+  .caveat {
+    background: #1c2040;
+    border-left: 3px solid #ff9f1c;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    color: var(--ink);
+  }
   .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; margin: 8px 0 14px; }
   .controls label { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
   input[type="range"] { accent-color: var(--accent); width: 200px; }
@@ -151,6 +159,7 @@
     Each throw lands at a completely random spot on the wall.</p>
     <p>If you throw <b>n</b> darts, what is the probability that <b>at least one</b> hits the target?</p>
     <p class="note">This is the same question as: if random insertions are scattered along a DNA segment, what is the probability a given gene gets hit at least once?</p>
+    <p class="caveat"><b>A caveat on the analogy.</b> Real darts aren't thrown randomly — even a poor player aims at the board, so their throws cluster around an intended point rather than spreading evenly across the wall. The maths below only works for genuinely uniform-random landings; a truer mental picture is raindrops falling on a roof, or buckshot fired blindfolded. The same idealisation reappears in the biology: most insertional mutagens (<i>Sleeping Beauty</i>, many retroviruses, <i>Agrobacterium</i> T-DNA) have target-site preferences, so "uniform random insertion" is a working approximation rather than a literal description.</p>
   </section>
 
   <!-- Section 2: One throw -->
