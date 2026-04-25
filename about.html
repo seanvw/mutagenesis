@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>About — Insertional Mutagenesis</title>
+<style>
+  :root {
+    --bg: #0f1220;
+    --panel: #171a2e;
+    --ink: #e6e9f5;
+    --muted: #8b93b5;
+    --accent: #4cc9f0;
+    --good: #06d6a0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
+  .nav {
+    display: flex;
+    gap: 18px;
+    padding: 10px 32px;
+    background: var(--panel);
+    border-bottom: 1px solid #232746;
+    font-size: 13px;
+  }
+  .nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nav a:hover { text-decoration: underline; }
+  .nav a.active { color: var(--ink); }
+  .nav .spacer { flex: 1; }
+
+  header { padding: 24px 32px 8px; max-width: 800px; margin: 0 auto; }
+  h1 { margin: 0; font-weight: 600; font-size: 26px; }
+  h2 { font-weight: 600; font-size: 18px; margin: 24px 0 10px; color: var(--ink); }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  main {
+    display: grid;
+    gap: 16px;
+    padding: 16px 32px 48px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid #232746;
+    border-radius: 10px;
+    padding: 18px 24px;
+  }
+  .prose p { line-height: 1.65; font-size: 14px; color: #d8dcef; margin: 0 0 14px; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose a { color: var(--accent); }
+  .prose ul { padding-left: 22px; line-height: 1.7; font-size: 14px; color: #d8dcef; }
+  .prose li { margin: 4px 0; }
+  .prose code { font-size: 13px; background: #1c2040; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">Simulation</a>
+  <a href="explainer.html">Explainer</a>
+  <a href="biology.html">Biology</a>
+  <a href="checkpoints.html">Checkpoints</a>
+  <a href="about.html" class="active">About</a>
+  <span class="spacer"></span>
+  <a href="https://github.com/seanvw/mutagenesis" target="_blank" rel="noopener">GitHub ↗</a>
+</nav>
+
+<header>
+  <h1>About</h1>
+  <div class="sub">A small interactive demo of insertional mutagenesis saturation.</div>
+</header>
+
+<main>
+  <section class="panel prose">
+    <h2>What this is</h2>
+    <p>A two-page static demo illustrating how random insertional mutagenesis saturates a genome. Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution; any insertion landing in a gene body knocks it out. The observed knockout curve tracks the expected <code>1 − (1 − p)ⁿ</code> closely.</p>
+    <p>No build system, no dependencies, no tracking. Both pages are self-contained HTML with inline CSS and vanilla JS — open them directly in a browser.</p>
+
+    <h2>Pages</h2>
+    <ul>
+      <li><a href="index.html">Simulation</a> — interactive run-the-experiment view.</li>
+      <li><a href="explainer.html">Explainer</a> — A-level-style derivation of the curve.</li>
+      <li><a href="biology.html">Biology</a> — the underlying biology and gene-density spread across cellular life.</li>
+      <li><a href="checkpoints.html">Checkpoints</a> — commit-log snapshot of the project.</li>
+    </ul>
+
+    <h2>Author</h2>
+    <p>Built by Sean Walsh. More work and contact details at <a href="https://seanvw.github.io/seanvw/" target="_blank" rel="noopener">seanvw.github.io/seanvw/</a>.</p>
+    <p>Source on <a href="https://github.com/seanvw/mutagenesis" target="_blank" rel="noopener">GitHub</a>.</p>
+  </section>
+</main>
+</body>
+</html>
