@@ -3,39 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <title>About — Insertional Mutagenesis</title>
+<link rel="stylesheet" href="shared.css">
 <style>
-  :root {
-    --bg: #0f1220;
-    --panel: #171a2e;
-    --ink: #e6e9f5;
-    --muted: #8b93b5;
-    --accent: #4cc9f0;
-    --good: #06d6a0;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    background: var(--bg); color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    min-height: 100vh;
-  }
-  .nav {
-    display: flex;
-    gap: 18px;
-    padding: 10px 32px;
-    background: var(--panel);
-    border-bottom: 1px solid #232746;
-    font-size: 13px;
-  }
-  .nav a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .nav a:hover { text-decoration: underline; }
-  .nav a.active { color: var(--ink); }
-  .nav .spacer { flex: 1; }
-
   header { padding: 24px 32px 8px; max-width: 800px; margin: 0 auto; }
   h1 { margin: 0; font-weight: 600; font-size: 26px; }
   h2 { font-weight: 600; font-size: 18px; margin: 24px 0 10px; color: var(--ink); }
@@ -48,12 +17,7 @@
     max-width: 800px;
     margin: 0 auto;
   }
-  .panel {
-    background: var(--panel);
-    border: 1px solid #232746;
-    border-radius: 10px;
-    padding: 18px 24px;
-  }
+  .panel { padding: 18px 24px; }
   .prose p { line-height: 1.65; font-size: 14px; color: #d8dcef; margin: 0 0 14px; }
   .prose p:last-child { margin-bottom: 0; }
   .prose a { color: var(--accent); }

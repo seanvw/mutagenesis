@@ -9,15 +9,17 @@ A two-page static web demo illustrating insertional mutagenesis saturation:
 - `index.html` — interactive simulation. Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution; any insertion landing in a gene body knocks it out.
 - `explainer.html` — A-level-style derivation of the expected curve `1 − (1 − p)ⁿ` and why the observed KO curve follows it.
 
-No build system, no dependencies, no tests, no git. Both files are self-contained: inline CSS + inline vanilla JS, no external scripts.
+No build system, no dependencies, no tests. Pages use inline vanilla JS (no external scripts) and a single shared stylesheet (`shared.css`).
 
 ## Running
 
-Open either HTML file directly in a browser (`open index.html`). Nothing to install or compile.
+Most pages work opened directly (`open index.html`). `checkpoints.html` needs HTTP because it `fetch()`es `commits.json` — run `./serve.sh` (binds 127.0.0.1:8000) for that one.
 
 ## Architecture
 
-Both pages share a dark palette defined via CSS custom properties at the top of each file (`--bg`, `--panel`, `--ink`, `--muted`, `--accent`, `--gene`, `--nc`, `--insert`, etc.). Keep these in sync if you change one — colours are used semantically (e.g. `--gene` = protein-coding, `--nc` = non-coding, `--gene-ko`/`--nc-ko` = knocked out).
+### Stylesheets
+
+`shared.css` holds everything common across pages: the core palette (`--bg`, `--panel`, `--ink`, `--muted`, `--accent`, `--good`), the `* { box-sizing }` reset, base `html, body`, the `.nav` block, and the `.panel` background/border/radius. Page-specific styles — including extra palette vars (`--gene`, `--nc`, `--insert`, `--hit`, `--extreme-hi`, etc.) and per-page `.panel` padding — live in each file's inline `<style>`. Pages link `shared.css` *before* their inline `<style>`, so inline rules and var declarations win on conflict. Colours are used semantically (e.g. `--gene` = protein-coding, `--nc` = non-coding, `--gene-ko`/`--nc-ko` = knocked out).
 
 ### `index.html` simulation model
 

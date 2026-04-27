@@ -3,49 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <title>Insertional Mutagenesis Simulation</title>
+<link rel="stylesheet" href="shared.css">
 <style>
   :root {
-    --bg: #0f1220;
-    --panel: #171a2e;
-    --ink: #e6e9f5;
-    --muted: #8b93b5;
-    --accent: #4cc9f0;
     --gene: #3a86ff;        /* protein-coding, intact */
     --gene-ko: #e63946;     /* knocked out (red) */
     --nc: #ff9f1c;          /* non-coding, intact */
     --nc-ko: #e63946;       /* knocked out (red) */
     --insert: #ef476f;
     --grid: #262a46;
-    --good: #06d6a0;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    background: var(--bg); color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    min-height: 100vh;
   }
   header {
     padding: 24px 32px 8px;
   }
   h1 { margin: 0; font-weight: 600; font-size: 22px; letter-spacing: 0.2px; }
   .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
-  .nav {
-    display: flex;
-    gap: 18px;
-    padding: 10px 32px;
-    background: var(--panel);
-    border-bottom: 1px solid #232746;
-    font-size: 13px;
-  }
-  .nav a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .nav a:hover { text-decoration: underline; }
-  .nav a.active { color: var(--ink); }
-  .nav .spacer { flex: 1; }
 
   main {
     display: grid;
@@ -55,12 +27,7 @@
     max-width: 1400px;
     margin: 0 auto;
   }
-  .panel {
-    background: var(--panel);
-    border: 1px solid #232746;
-    border-radius: 10px;
-    padding: 16px 20px;
-  }
+  .panel { padding: 16px 20px; }
   .controls {
     display: flex;
     flex-wrap: wrap;
