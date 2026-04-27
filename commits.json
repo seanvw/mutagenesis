@@ -1,5 +1,23 @@
 [
   {
+    "sha": "53266d9e477833b968aa30c096aba1fa2d927a9a",
+    "short_sha": "53266d9",
+    "subject": "Update README with new pages, presets, and serve note",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-27T20:29:12+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/53266d9e477833b968aa30c096aba1fa2d927a9a"
+  },
+  {
+    "sha": "d19bc4c2abf6af8ab6ee79335d402c5c7ce02c2f",
+    "short_sha": "d19bc4c",
+    "subject": "Refresh commits.json",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-27T20:23:13+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/d19bc4c2abf6af8ab6ee79335d402c5c7ce02c2f"
+  },
+  {
     "sha": "f4140bf152114d16f85c995c169160618aba3ef2",
     "short_sha": "f4140bf",
     "subject": "Extract shared CSS into shared.css",
