@@ -1,5 +1,32 @@
 [
   {
+    "sha": "f4140bf152114d16f85c995c169160618aba3ef2",
+    "short_sha": "f4140bf",
+    "subject": "Extract shared CSS into shared.css",
+    "body": "Pull the palette vars, body reset, .nav block, and .panel base out\nof every page and into a single linked stylesheet. Each page keeps\nits own extra palette vars and per-page rules inline. Normalises\nexplainer.html's .top-nav to .nav so the rule lives in one place.\n\nCo-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-27T20:23:08+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/f4140bf152114d16f85c995c169160618aba3ef2"
+  },
+  {
+    "sha": "067cc0f5489b1dd870128164cd6632a4c62d1d47",
+    "short_sha": "067cc0f",
+    "subject": "Add About page linking to author site",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T11:49:09+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/067cc0f5489b1dd870128164cd6632a4c62d1d47"
+  },
+  {
+    "sha": "ffc8de1a9880df3fd8721ce570cda90c0f31586b",
+    "short_sha": "ffc8de1",
+    "subject": "Refresh commits.json",
+    "body": "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>",
+    "date": "2026-04-25T10:39:41+02:00",
+    "author": "Sean Walsh",
+    "url": "https://github.com/seanvw/mutagenesis/commit/ffc8de1a9880df3fd8721ce570cda90c0f31586b"
+  },
+  {
     "sha": "4d31413f2b22df7dec389c502eaa4478d377f3a6",
     "short_sha": "4d31413",
     "subject": "Add caveat to dart analogy in explainer",
