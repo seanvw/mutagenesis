@@ -1,19 +1,32 @@
 # Insertional Mutagenesis Simulation
 
-An interactive, single-page visualisation of how random insertional mutagenesis saturates a genome. Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution; any insertion landing inside a gene body knocks it out.
+An interactive visualisation of how random insertional mutagenesis saturates a genome. Random insertions accumulate across a 30-gene window drawn from a chosen species' gene-size distribution; any insertion landing inside a gene body knocks it out.
 
 ## Pages
 
-- **`index.html`** — the interactive simulation. Pick a species preset (*S. cerevisiae*, *A. thaliana*, *E. coli*, *H. sapiens*, or a synthetic toy), press **Start**, and watch protein-coding and non-coding knockout curves rise against their theoretical expectations.
+- **`index.html`** — the interactive simulation. Pick a species preset (*C. ruddii*, *E. coli*, *S. cerevisiae*, *A. thaliana*, *H. sapiens*, *P. japonica*, or a synthetic toy), press **Start**, and watch protein-coding and non-coding knockout curves rise against their theoretical expectations.
 - **`explainer.html`** — a short derivation of why the expected curve follows `1 − (1 − p)ⁿ`, aimed at A-level / introductory-undergraduate readers.
+- **`biology.html`** — the underlying biology and a cross-species table of gene density spanning roughly four orders of magnitude.
+- **`checkpoints.html`** — a build-time snapshot of the project's commit history.
+- **`about.html`** — short blurb and author link.
+
+Pages share a single linked stylesheet (`shared.css`) for palette and chrome; everything else (controls, charts, prose, tables) is inline vanilla CSS + JS, no external scripts.
 
 ## Running
 
-No build, no dependencies. Just open either file in a browser:
+No build, no dependencies. Most pages work opened directly:
 
 ```sh
 open index.html
 ```
+
+`checkpoints.html` `fetch()`es `commits.json`, which browsers block under `file://`. For that page (or to test the whole site over HTTP), run:
+
+```sh
+./serve.sh        # python3 -m http.server on 127.0.0.1:8000
+```
+
+To refresh the commit history shown on the Checkpoints page, run `./build-commits.py` after committing.
 
 ## What the simulation shows
 
